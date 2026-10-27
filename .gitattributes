@@ -1,0 +1,14 @@
+# Preserve audited source and generated evidence byte for byte.
+fdm_mini_tools/** -text
+reports/task11/** -text
+dist/** -text
+reports/task12/** -text
+reports/task13/** -text
+reports/task14/** -text
+reports/task15/** -text
+reports/task16/** -text
+tests/reference/** -text
+reports/task17/** -text
+reports/task18/** -text
+reports/task19/** -text
+reports/task20/** -text

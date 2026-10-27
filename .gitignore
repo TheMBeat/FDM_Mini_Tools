@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.blend1
+*.blend2
+.vscode/
+.idea/
+build/
+dist/
+reports/
+*.stl
+*.3mf
+!fixtures/*.stl
+
+# Local runtime log
+00000.log
+
+# Public-release preparation and local test data
+release_ready/
+*.gcode
+*.opc
+*.blend
+!fdm_mini_tools/resources/SLASG_FDM_Mini.blend
