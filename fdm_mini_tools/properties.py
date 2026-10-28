@@ -85,42 +85,42 @@ def _optimizer_preset_update(self, context):
 
 
 class FDMMINI_Properties(PropertyGroup):
-    tree_guided_recovery: BoolProperty(name='Umwege zu geerdeten Aesten (Experiment)',default=True,
-        description='Begrenzte Suche mit voller Kollisionspruefung; Schichtdiagnose offener Kontakte. Keine Garantie vollstaendiger Abdeckung')
-    tree_complete_contacts: BoolProperty(name='Offene Kontakte absichern (Experiment)',default=True,
-        description='Alternative kompakte Tips und niedrige Fuesse mit unveraenderten Winkel- und Kollisionsgrenzen pruefen; ungeloeste Stellen bleiben gesperrt')
-    tree_stabilize_stems: BoolProperty(name='Lange Staemme absichern (Experiment)',default=True,
-        description='Freie Laenge pruefen; diagonale Rahmen, verstaerkte Staemme oder zweiten geerdeten Stamm geometrisch vergleichen; kein mechanischer Drucknachweis')
-    tree_stem_slenderness: FloatProperty(name='Max. freie Laenge / wirksamer Durchmesser',default=18.,min=5.,max=50.)
-    tree_stem_min_length: FloatProperty(name='Stammpruefung ab Laenge (mm)',default=12.,min=1.,max=100.)
-    tree_stem_max_diameter: FloatProperty(name='Max. verstaerkter Stamm (mm)',default=3.2,min=.5,max=8.)
-    tree_reuse_branches: BoolProperty(name='Aeste gemeinsam nutzen (Experiment)',default=False,
-        description='Ungeloeste Kontakte an bereits geerdete Aeste anschliessen; tragende Aeste nach Dimensionierungsregel verstaerken und erneut auf Kollisionen pruefen')
-    tree_required_minima: BoolProperty(name='Pflicht-Tiefpunkte ergaenzen (Experiment)',default=True,
-        description='Zusaetzlich zu SLASG: erste Druckpunkte unabhaengig vom Ueberhangwinkel absichern; alle Kollisionsgrenzen bleiben erhalten')
-    tree_layer_height: FloatProperty(name='Schichthoehe fuer Tiefpunkte (mm)',default=.08,min=.01,max=.4,precision=3)
-    optimization_profile: StringProperty(name='Aufgeloestes Druckprofil',subtype='FILE_PATH')
-    optimization_directory: StringProperty(name='Vergleichsordner',subtype='DIR_PATH',default='//mini_optimization/')
+    tree_guided_recovery: BoolProperty(name="Route around obstacles to rooted branches (experimental)",default=True,
+        description="Bounded search with full collision checks and layer diagnostics. Complete coverage is not guaranteed")
+    tree_complete_contacts: BoolProperty(name="Recover unresolved contacts (experimental)",default=True,
+        description="Try compact tips and low bases within existing angle and collision limits; unresolved regions remain blocked")
+    tree_stabilize_stems: BoolProperty(name="Stabilize long stems (experimental)",default=True,
+        description="Check free spans; compare diagonal bracing, thicker stems and paired rooted stems; mechanical strength is unverified")
+    tree_stem_slenderness: FloatProperty(name="Max. free span / effective diameter",default=18.,min=5.,max=50.)
+    tree_stem_min_length: FloatProperty(name="Check stems longer than (mm)",default=12.,min=1.,max=100.)
+    tree_stem_max_diameter: FloatProperty(name="Max. reinforced stem diameter (mm)",default=3.2,min=.5,max=8.)
+    tree_reuse_branches: BoolProperty(name="Reuse branches (experimental)",default=False,
+        description="Attach unresolved contacts to rooted branches; reinforce carrying paths and recheck collisions")
+    tree_required_minima: BoolProperty(name="Support required low points (experimental)",default=True,
+        description="Supplement SLASG with first-layer birth contacts regardless of overhang angle; preserve all collision limits")
+    tree_layer_height: FloatProperty(name="Layer height for low points (mm)",default=.08,min=.01,max=.4,precision=3)
+    optimization_profile: StringProperty(name="Resolved print profile",subtype='FILE_PATH', description='Resolved printer settings imported from Orca, including inherited settings. Bridge span remains unverified without calibration.')
+    optimization_directory: StringProperty(name="Comparison folder",subtype='DIR_PATH',default='//mini_optimization/')
     optimization_orca: StringProperty(name='OrcaSlicer',subtype='FILE_PATH',default=r'C:\Program Files\OrcaSlicer\orca-slicer.exe')
-    optimization_auto_compare: BoolProperty(name='Varianten automatisch vergleichen',default=True)
-    optimization_max_parts: IntProperty(name='Hoechstens Teile',default=6,min=1,max=6)
-    optimization_joint_type: EnumProperty(name='Verbindung',items=[
-        ('FLAT','Gerade Klebeflaeche','Geschlossene Schnittflaechen ohne Fuehrung; Schnittflaeche direkt aufs Druckbett'),
-        ('HEMISPHERE','Halbkugel','Zwei ungleiche Halbkugeln mit passenden Vertiefungen; Schnittseite nach oben')],default='FLAT')
-    optimization_clearance: FloatProperty(name='Steckspiel je Seite (mm)',default=.15,min=.02,max=.5,precision=3,
-        description='Unkalibrierter Startwert. Passungstest vor dem Mini-Druck verwenden')
-    optimization_split_mode: EnumProperty(name='Aufteilung',items=[
-        ('AUTO','Automatisch','Sichere Schnittvarianten suchen'),
-        ('MANUAL','Manuelle Schnittebene','Position und Drehung des Ebenenhelfers verwenden'),
-        ('OFF','Ohne Teilung','Nur aktuelle und automatische Ausrichtung vergleichen')],default='AUTO')
-    optimization_cut_plane: PointerProperty(name='Schnittebene',type=bpy.types.Object)
-    optimization_report: StringProperty(name='Vergleichsbericht',subtype='FILE_PATH')
-    optimization_status: StringProperty(name='Optimierungsstatus')
+    optimization_auto_compare: BoolProperty(name="Automatically compare variants",default=True, description='Compare orientations and optional splits with Orca instead of preparing one model. This can take several minutes.')
+    optimization_max_parts: IntProperty(name="Maximum parts",default=6,min=1,max=6, description='Upper limit on generated parts; fewer parts may be selected when splitting has no proven advantage.')
+    optimization_joint_type: EnumProperty(name="Connection",items=[
+        ('FLAT',"Flat glue face","Closed cut faces without keys; place cut face directly on the bed"),
+        ('HEMISPHERE',"Hemisphere","Two unequal hemispheres with matching sockets; cut face upwards")],default='FLAT', description='Flat faces can rest on the print bed. Hemispherical keys need matching sockets and a calibrated fit.')
+    optimization_clearance: FloatProperty(name="Fit clearance per side (mm)",default=.15,min=.02,max=.5,precision=3,
+        description="Uncalibrated starting value. Print the fit test before the miniature")
+    optimization_split_mode: EnumProperty(name="Splitting",items=[
+        ('AUTO',"Automatic","Search for safe split variants"),
+        ('MANUAL',"Manual cutting plane","Use the cutting helper position and rotation"),
+        ('OFF',"No splitting","Compare current and automatic orientation only")],default='AUTO', description='Choose automatic splitting, a manually positioned cutting plane, or an unsplit comparison.')
+    optimization_cut_plane: PointerProperty(name="Cutting plane",type=bpy.types.Object, description='Object defining the position and normal of the manual cut. The original model is preserved.')
+    optimization_report: StringProperty(name="Comparison report",subtype='FILE_PATH')
+    optimization_status: StringProperty(name="Optimization status")
     optimization_results_json: StringProperty(default='[]',options={'HIDDEN'})
-    ui_workflow_step: EnumProperty(name='Arbeitsschritt',items=[
-        ('MODEL','1','Modell laden'),('PROFILE','2','Druckprofil und Detailschutz'),
-        ('CALCULATE','3','Stuetzen berechnen'),('REVIEW','4','Ergebnis pruefen'),
-        ('EXPORT','5','Dateien fuer Orca')],default='MODEL')
+    ui_workflow_step: EnumProperty(name="Workflow step",items=[
+        ('MODEL','1',"Load model"),('PROFILE','2',"Print profile and detail protection"),
+        ('CALCULATE','3',"Calculate supports"),('REVIEW','4',"Review result"),
+        ('EXPORT','5',"Files for Orca")],default='MODEL')
     ui_selected_variant: StringProperty(default='ORIGINAL',options={'HIDDEN'})
     ui_variant_assembly: BoolProperty(default=False,options={'HIDDEN'})
     target_model: PointerProperty(name="Mini", type=bpy.types.Object)
@@ -262,19 +262,19 @@ class FDMMINI_Properties(PropertyGroup):
     orientation_mode: EnumProperty(
         name="Orientation mode",
         items=[
-            ("SCORED", "Automatisch (Details)", "Lage nach Ueberhaengen und Detailbereich bewerten"),
-            ("FIXED", "Manuelle Winkel", "Rueck- und Seitenneigung manuell festlegen"),
-            ("KEEP", "Lage behalten", "Modell nicht drehen"),
+            ("SCORED", "Automatic (details)", "Score orientation by overhangs and detail region"),
+            ("FIXED", "Manual angles", "Set back and side tilt manually"),
+            ("KEEP", "Keep orientation", "Do not rotate model"),
         ],
         default="SCORED",
     )
     orientation_front: EnumProperty(
-        name='Vorderseite',
-        description='Automatische Detail-Heuristik oder manuell festgelegte Vorderseite; keine sichere Gesichtserkennung',
-        items=[('AUTO','Automatisch (Details)','Oberen zentralen Detailbereich automatisch schaetzen'),
-               ('VIEW','Aus Ansicht','Die mit Diese Ansicht ist vorne gespeicherte Richtung verwenden'),
-               ('POS_Y','+Y','Modellvorderseite entlang +Y'),('NEG_Y','-Y','Modellvorderseite entlang -Y'),
-               ('POS_X','+X','Modellvorderseite entlang +X'),('NEG_X','-X','Modellvorderseite entlang -X')],
+        name="Front side",
+        description="Automatic detail heuristic or manually selected front; face detection is uncertain",
+        items=[('AUTO',"Automatic (details)","Estimate the upper central detail region"),
+               ('VIEW',"From view","Use the direction saved with Use current view as front"),
+               ('POS_Y','+Y',"Model front along +Y"),('NEG_Y','-Y',"Model front along -Y"),
+               ('POS_X','+X',"Model front along +X"),('NEG_X','-X',"Model front along -X")],
         default='AUTO',
     )
     tilt_x: FloatProperty(name="Back tilt °", default=35.0, min=-60.0, max=60.0)
@@ -295,11 +295,11 @@ class FDMMINI_Properties(PropertyGroup):
     )
 
     tree_contact_backend: EnumProperty(
-        name="Kontaktpunkte",
-        description="SLASG ist die Referenz; eigener Sammler nur fuer A/B-Tests",
+        name="Contact points",
+        description="SLASG is the reference; native sampler is for A/B tests only",
         items=[
-            ("SLASG", "SLASG (Referenz)", "Bewaehrte SLASG-Verteilung: Overhangs, Inseln und lokale Tiefpunkte"),
-            ("NATIVE_EXPERIMENTAL", "Python (Experiment)", "Nur fuer A/B-Tests, Gleichwertigkeit nicht belegt"),
+            ("SLASG", "SLASG (reference)", "Reference SLASG distribution: overhangs, islands and local low points"),
+            ("NATIVE_EXPERIMENTAL", "Python (Experiment)", "For A/B tests only; parity has not been demonstrated"),
         ],
         default="SLASG",
     )
@@ -308,9 +308,9 @@ class FDMMINI_Properties(PropertyGroup):
         name="Options",
         description="Choose how many controls are visible, without changing the saved settings",
         items=[
-            ("SIMPLE", "Einfach", "Few controls and a guided workflow"),
-            ("ADVANCED", "Erweitert", "Tuning and manual preparation steps"),
-            ("EXPERT", "Experte", "All configuration and diagnostic controls"),
+            ("SIMPLE", "Simple", "Few controls and a guided workflow"),
+            ("ADVANCED", "Advanced", "Tuning and manual preparation steps"),
+            ("EXPERT", "Expert", "All configuration and diagnostic controls"),
         ],
         default="SIMPLE",
     )
@@ -341,9 +341,9 @@ class FDMMINI_Properties(PropertyGroup):
     resolution: IntProperty(name="Support sides", default=8, min=5, max=24)
     max_neck_angle: FloatProperty(name="Max neck angle °", default=25.0, min=5.0, max=60.0)
 
-    spacing: FloatProperty(name="Spacing mm", default=1.45, min=0.5, max=10.0)
+    spacing: FloatProperty(name="Spacing mm", default=1.45, min=0.5, max=10.0, description='Requested spacing between contact candidates in millimeters. Smaller spacing can add contacts and increase runtime.')
     safe_distance: FloatProperty(name="Safe distance mm", default=0.55, min=0.0, max=5.0)
-    overhang_angle: FloatProperty(name="Overhang °", default=45.0, min=20.0, max=80.0)
+    overhang_angle: FloatProperty(name="Overhang °", default=45.0, min=20.0, max=80.0, description='Surface angle used to select support candidates. Local low points are checked separately when enabled.')
     use_islands: BoolProperty(name="Topological islands", default=True)
     use_trees: BoolProperty(name="Auto trees", default=True)
     tree_merge_distance: FloatProperty(name="Tree merge mm", default=4.0, min=1.0, max=20.0)
@@ -389,17 +389,17 @@ class FDMMINI_Properties(PropertyGroup):
         precision=1,
         description="Maximum lateral search radius for a collision-free buildplate root",
     )
-    tree_route_mode: EnumProperty(name='Wegsuche',items=[
-        ('DIRECT','Direkt (Referenz)','Bisherige direkte Bodenverbindung'),
-        ('WAYPOINT_EXPERIMENTAL','Umwege (Experiment)','Begrenzte abwaerts gerichtete Zwischenpunktsuche')],default='DIRECT')
-    tree_route_budget: IntProperty(name='Suchbudget',default=64,min=8,max=512)
-    tree_budget_enabled: BoolProperty(name='Zusatzsuche begrenzen',default=True)
-    tree_prioritize_contacts: BoolProperty(name='Inseln zuerst absichern',default=True)
-    tree_recovery_seconds: FloatProperty(name='Zusatzsuche gesamt (s)',default=20,min=.1,max=300)
-    tree_recovery_region_seconds: FloatProperty(name='Zusatzsuche je Region (s)',default=3,min=.05,max=30)
-    tree_show_missing: BoolProperty(name='Fehlende Stützen markieren',default=True)
-    allow_incomplete_tree_export: BoolProperty(name='Unvollständige Vorschau exportieren',default=False,
-        description='Bewusster Preview-Export trotz fehlender Kontakte; kein Druckfreigabe-Nachweis')
+    tree_route_mode: EnumProperty(name="Routing",items=[
+        ('DIRECT',"Direct (reference)","Established direct connection to the bed"),
+        ('WAYPOINT_EXPERIMENTAL',"Obstacle routing (experimental)","Bounded downward waypoint search")],default='DIRECT')
+    tree_route_budget: IntProperty(name="Search budget",default=64,min=8,max=512)
+    tree_budget_enabled: BoolProperty(name="Limit additional search",default=True)
+    tree_prioritize_contacts: BoolProperty(name="Prioritize island support",default=True)
+    tree_recovery_seconds: FloatProperty(name="Total additional search (s)",default=20,min=.1,max=300)
+    tree_recovery_region_seconds: FloatProperty(name="Additional search per region (s)",default=3,min=.05,max=30)
+    tree_show_missing: BoolProperty(name='Mark missing supports',default=True)
+    allow_incomplete_tree_export: BoolProperty(name='Export incomplete preview',default=False,
+        description="Explicit preview export with missing contacts; not cleared for printing")
     tree_ground_search_step: FloatProperty(
         name="Ground search step mm",
         default=1.5,
@@ -464,7 +464,7 @@ class FDMMINI_Properties(PropertyGroup):
         precision=3,
     )
 
-    use_raft: BoolProperty(name="Skate raft", default=True)
+    use_raft: BoolProperty(name="Skate raft", default=True, description='Create a shared base under Tree supports. Raft geometry and model clearance must pass validation.')
     raft_expand_width: FloatProperty(name="Raft expand mm", default=1.50, min=0.2, max=6.0)
     raft_floor_thickness: FloatProperty(name="Raft floor mm", default=0.60, min=0.2, max=3.0)
     raft_wall_height: FloatProperty(name="Raft wall height mm", default=0.80, min=0.0, max=4.0)

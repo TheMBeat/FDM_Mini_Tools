@@ -132,7 +132,7 @@ def _cache_comparison_ui(p, report):
 
 class FDMMINI_OT_workflow_step(Operator):
     bl_idname='fdm_mini_tools.workflow_step'
-    bl_label='Naechster Arbeitsschritt'
+    bl_label="Next workflow step"
     step: StringProperty(default='MODEL')
 
     def execute(self,context):
@@ -144,8 +144,8 @@ class FDMMINI_OT_workflow_step(Operator):
 
 class FDMMINI_OT_workflow_single(Operator):
     bl_idname='fdm_mini_tools.workflow_single'
-    bl_label='Einzelmodell vorbereiten'
-    bl_description='Original-STL neu laden, nachbearbeiten, ausrichten und abstuetzen; ohne Variantenvergleich und Orca'
+    bl_label="Prepare single model"
+    bl_description="Reload the original STL, optimize, orient and support it; no variant comparison or Orca"
 
     def execute(self,context):
         p=context.scene.fdm_mini_tools
@@ -165,8 +165,8 @@ class FDMMINI_OT_workflow_single(Operator):
 
 class FDMMINI_OT_variant_files(Operator):
     bl_idname='fdm_mini_tools.variant_files'
-    bl_label='Variantendateien oeffnen'
-    bl_description='Ordner der gezeigten Variante mit bereits erzeugten 3MF/STL-Dateien oeffnen'
+    bl_label="Open variant files"
+    bl_description="Open the displayed variant folder containing generated 3MF/STL files"
 
     def execute(self,context):
         p=context.scene.fdm_mini_tools
@@ -175,7 +175,7 @@ class FDMMINI_OT_variant_files(Operator):
             row=next(r for r in report['candidates'] if r['id']==p.ui_selected_variant)
             project=Path(row['project'])
             if not project.is_file():
-                raise ValueError('Variantendateien fehlen; Vergleich erneut erzeugen')
+                raise ValueError("Variant files are missing; run comparison again")
             return bpy.ops.wm.path_open(filepath=str(project.parent))
         except Exception as exc:
             self.report({'ERROR'},str(exc));return {'CANCELLED'}
@@ -343,7 +343,7 @@ def _early_variant_comparison(context, props, source, slasg, cfg, progress):
     if props.optimization_directory.startswith('//') and not bpy.data.filepath:
         props.optimization_directory=str(Path(source).resolve().parent/props.optimization_directory[2:])
     if bpy.ops.fdm_mini_tools.optimization_run()!={'FINISHED'}:
-        raise RuntimeError('Variantenvergleich fehlgeschlagen; siehe Vergleichsbericht')
+        raise RuntimeError("Variant comparison failed; see the comparison report")
     report=json.loads(Path(props.optimization_report).read_text(encoding='utf-8'))
     chosen=report.get('recommended')
     if not chosen and report['candidates']:
@@ -355,8 +355,8 @@ def _early_variant_comparison(context, props, source, slasg, cfg, progress):
         row=next(r for r in report['candidates'] if r['id']==chosen)
         _store_stats(props,_variant_analysis(stats,row))
         bpy.ops.fdm_mini_tools.optimization_show(candidate=chosen)
-        props.status_text=('Geometrisch gepruefte Variante: ' if report.get('recommended') else
-                           'Unvollstaendige Vorschau: ')+chosen
+        props.status_text=("Geometry-checked variant: " if report.get('recommended') else
+                           "Incomplete preview: ")+chosen
     if props.save_blend:
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(props.optimization_report).with_name('comparison.blend')))
     return True
@@ -495,7 +495,7 @@ class FDMMINI_OT_export(Operator):
     def execute(self, context):
         props = context.scene.fdm_mini_tools
         if props.ui_selected_variant!='ORIGINAL' and props.optimization_report:
-            self.report({'ERROR'}, 'Gezeigte Variante: vorhandene Dateien in Schritt 5 oeffnen')
+            self.report({'ERROR'}, "Displayed variant: open existing files in step 5")
             return {'CANCELLED'}
         if not props.target_model or not props.support_object:
             self.report({"ERROR"}, "Generate supports first.")
@@ -602,7 +602,7 @@ class FDMMINI_OT_optimize_current(Operator):
 
 class FDMMINI_OT_front_from_view(Operator):
     bl_idname = 'fdm_mini_tools.front_from_view'
-    bl_label = 'Diese Ansicht ist vorne'
+    bl_label = "Use current view as front"
     bl_options = {'REGISTER','UNDO'}
 
     def execute(self, context):
@@ -610,12 +610,12 @@ class FDMMINI_OT_front_from_view(Operator):
         obj = p.target_model
         region = getattr(context.space_data, 'region_3d', None)
         if obj is None or region is None:
-            self.report({'ERROR'}, 'MINI in einer 3D-Ansicht oeffnen')
+            self.report({'ERROR'}, "Open MINI in a 3D view")
             return {'CANCELLED'}
         front = obj.matrix_world.to_3x3().inverted_safe() @ (region.view_rotation @ Vector((0,0,1)))
         front.normalize()
         if Vector((front.x,front.y,0)).length < .2:
-            self.report({'ERROR'}, 'Eine Ansicht von vorne verwenden, keine Draufsicht')
+            self.report({'ERROR'}, "Use a front view rather than a top view")
             return {'CANCELLED'}
         obj[orientation.FRONT_KEY] = list(front)
         basis = obj.get('fdm_orientation_source_basis')
@@ -624,7 +624,7 @@ class FDMMINI_OT_front_from_view(Operator):
         p.orientation_front_vector = source_front.normalized()
         p.orientation_front_path = p.last_import_path
         p.orientation_front = 'VIEW'
-        p.status_text = 'Vorderseite gespeichert; jetzt Ausrichten'
+        p.status_text = "Front direction saved; apply orientation next"
         return {'FINISHED'}
 
 
@@ -656,7 +656,7 @@ class FDMMINI_OT_orient_current(Operator):
                 bpy.data.objects.remove(p.support_object, do_unlink=True)
             p.support_object = None
             progress(100, "Orientation complete")
-            p.status_text = 'Mini ausgerichtet; Supports neu erzeugen'
+            p.status_text = "Mini oriented; regenerate supports"
             _finish_progress(context, p, success=True)
             return {"FINISHED"}
         except Exception as exc:
@@ -843,15 +843,15 @@ class FDMMINI_OT_clear_supports(Operator):
 
 class FDMMINI_OT_optimization_profile(Operator):
     bl_idname='fdm_mini_tools.optimization_profile'
-    bl_label='Qidi-Mini-Profil einlesen'
-    bl_description='Orca-Profile einschliesslich Vererbung in einer isolierten Kopie aufloesen'
+    bl_label="Load Qidi mini profile"
+    bl_description="Resolve inherited Orca profiles in an isolated copy"
 
     def execute(self,context):
         from . import print_profile
         p=context.scene.fdm_mini_tools
         try:
             if not p.target_model:
-                raise ValueError('Zuerst eine Mini importieren')
+                raise ValueError("Import a mini first")
             base=(Path(p.last_import_path).resolve().parent/p.optimization_directory[2:]
                   if p.optimization_directory.startswith('//') and not bpy.data.filepath and p.last_import_path
                   else Path(bpy.path.abspath(p.optimization_directory)))
@@ -862,7 +862,7 @@ class FDMMINI_OT_optimization_profile(Operator):
             result=print_profile.resolve(bpy.path.abspath(p.optimization_orca),directory,probe)
             p.optimization_profile=str(directory/'profile.json')
             p.tree_layer_height=result['summary']['layer_mm']
-            p.optimization_status=f"Profil: {result['summary']['layer_mm']:.2f} mm; Brueckenlaenge unbestaetigt"
+            p.optimization_status=f"Profile: {result['summary']['layer_mm']:.2f} mm; bridge span is unverified"
             p.ui_workflow_step='CALCULATE'
             return {'FINISHED'}
         except Exception as exc:
@@ -871,13 +871,13 @@ class FDMMINI_OT_optimization_profile(Operator):
 
 class FDMMINI_OT_optimization_plane(Operator):
     bl_idname='fdm_mini_tools.optimization_plane'
-    bl_label='Schnittebene anlegen'
+    bl_label="Create cutting plane"
     bl_options={'REGISTER','UNDO'}
 
     def execute(self,context):
         p=context.scene.fdm_mini_tools
         if not p.target_model:
-            self.report({'ERROR'},'Zuerst eine Mini importieren');return {'CANCELLED'}
+            self.report({'ERROR'},"Import a mini first");return {'CANCELLED'}
         bounds=core.bounds(p.target_model)
         obj=bpy.data.objects.new('MINI_SCHNITTEBENE',None)
         context.scene.collection.objects.link(obj)
@@ -891,23 +891,23 @@ class FDMMINI_OT_optimization_plane(Operator):
 
 class FDMMINI_OT_optimization_run(Operator):
     bl_idname='fdm_mini_tools.optimization_run'
-    bl_label='Mini-Varianten vergleichen (Experiment)'
-    bl_description='Aktuelle Lage, automatische Lage und sichere Aufteilung mit SLASG und Orca vergleichen; kann mehrere Minuten dauern'
+    bl_label="Compare mini variants (experimental)"
+    bl_description="Compare current orientation, automatic orientation and safe splits with SLASG and Orca; may take several minutes"
 
     def execute(self,context):
         from . import mini_optimizer
         p=context.scene.fdm_mini_tools
         if not p.target_model:
-            self.report({'ERROR'},'Zuerst eine Mini importieren');return {'CANCELLED'}
-        _begin_progress(context,p,'Mini-Varianten vergleichen')
+            self.report({'ERROR'},"Import a mini first");return {'CANCELLED'}
+        _begin_progress(context,p,"Compare mini variants")
         try:
             if not p.optimization_profile or not Path(bpy.path.abspath(p.optimization_profile)).is_file():
                 if bpy.ops.fdm_mini_tools.optimization_profile() != {'FINISHED'}:
-                    raise RuntimeError('Druckprofil konnte nicht eingelesen werden')
+                    raise RuntimeError("Could not load print profile")
             plane=None
             if p.optimization_split_mode=='MANUAL':
                 if not p.optimization_cut_plane:
-                    raise ValueError('Schnittebene anlegen und positionieren')
+                    raise ValueError("Create and position cutting plane")
                 obj=p.optimization_cut_plane
                 normal=obj.matrix_world.to_3x3().inverted().transposed() @ Vector((0,0,1))
                 plane=dict(center=list(obj.matrix_world.translation),normal=list(normal.normalized()))
@@ -926,16 +926,16 @@ class FDMMINI_OT_optimization_run(Operator):
             p.ui_selected_variant='ORIGINAL'
             p.ui_variant_assembly=False
             _cache_comparison_ui(p,result)
-            p.optimization_status=(f"{len(result['candidates'])} Vergleiche; Empfehlung: {result['recommended'] or 'keine vollstaendige Variante'}")
+            p.optimization_status=(f"{len(result['candidates'])} comparisons; recommendation: {result['recommended'] or "no complete variant"}")
             if result['failures']:
-                p.optimization_status+=f"; {len(result['failures'])} Fehler im Bericht"
+                p.optimization_status+=f"; {len(result['failures'])} errors in the report"
             if not result['candidates']:
-                raise RuntimeError('Keine Variante hat alle Vergleichspruefungen bestanden; Details im gespeicherten Bericht')
+                raise RuntimeError("No variant passed all comparison checks; see the saved report")
             chosen=result.get('recommended') or min(result['candidates'],key=lambda row:(
                 sum(part['tree'].get('required_minima',{}).get('missing',0) for part in row['pieces']),
                 row.get('unresolved_tips',0),row.get('total_filament_mm3',0),row['id']))['id']
             if bpy.ops.fdm_mini_tools.optimization_show(candidate=chosen)!={'FINISHED'}:
-                raise RuntimeError('Vergleich fertig, aber Vorschau konnte nicht geladen werden')
+                raise RuntimeError("Comparison finished, but the preview could not be loaded")
             _finish_progress(context,p,success=True)
             self.report({'INFO'},p.optimization_status)
             return {'FINISHED'}
@@ -946,7 +946,7 @@ class FDMMINI_OT_optimization_run(Operator):
 
 class FDMMINI_OT_optimization_show(Operator):
     bl_idname='fdm_mini_tools.optimization_show'
-    bl_label='Vergleichsvorschau'
+    bl_label="Comparison preview"
     candidate: StringProperty(default='ORIGINAL')
     assembly: BoolProperty(default=False,options={'HIDDEN'})
 
@@ -959,7 +959,7 @@ class FDMMINI_OT_optimization_show(Operator):
                 row=next(r for r in report['candidates'] if r['id']==self.candidate)
                 if not bpy.data.collections.get(row['collection']) or any(
                         bpy.data.objects.get(part['object']) is None for part in row['pieces']):
-                    raise ValueError('Vergleichsobjekte fehlen in dieser Szene; Vergleich erneut erzeugen')
+                    raise ValueError("Variant objects are missing from this scene; run comparison again")
             for collection in bpy.data.collections:
                 if collection.get('fdm_optimization_assembly_preview'):
                     collection.hide_viewport=True;collection.hide_render=True
@@ -980,7 +980,7 @@ class FDMMINI_OT_optimization_show(Operator):
                     if collection is None:
                         sources=[bpy.data.objects.get(part['object']) for part in row['pieces']]
                         if any(source is None for source in sources):
-                            raise ValueError('Vergleichsobjekte fehlen in dieser Szene; Vergleich erneut erzeugen')
+                            raise ValueError("Variant objects are missing from this scene; run comparison again")
                         objects=[]
                         try:
                             for source,part in zip(sources,row['pieces']):
@@ -1021,7 +1021,7 @@ class FDMMINI_OT_optimization_show(Operator):
 
 class FDMMINI_OT_optimization_calibration(Operator):
     bl_idname='fdm_mini_tools.optimization_calibration'
-    bl_label='Bruecken- und Passungstest erzeugen'
+    bl_label="Create bridge and fit test"
     bl_options={'REGISTER','UNDO'}
 
     def execute(self,context):
@@ -1034,7 +1034,7 @@ class FDMMINI_OT_optimization_calibration(Operator):
             for obj in objects:
                 core.export_selected_stl(str(directory/(obj.name+'.stl')),[obj])
             mini_optimizer._collection('FDM_KALIBRIERUNG',objects)
-            p.optimization_status='Bruecken 2/4/6/8/10/12/14 mm und Steckpassung erzeugt; Drucktest ausstehend'
+            p.optimization_status="Created 2/4/6/8/10/12/14 mm bridges and fit test; print testing pending"
             self.report({'INFO'},p.optimization_status);return {'FINISHED'}
         except Exception as exc:
             self.report({'ERROR'},str(exc));return {'CANCELLED'}

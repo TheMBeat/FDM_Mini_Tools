@@ -6,7 +6,7 @@ def main():
  p=argparse.ArgumentParser();p.add_argument("--blender",required=True);p.add_argument("--output-dir",type=Path,default=ROOT/"reports/public_validation")
  a=p.parse_args();out=a.output_dir.resolve();out.mkdir(parents=True,exist_ok=True)
  runs=[("offline",[sys.executable,"-m","unittest","discover","-s",str(ROOT/"tests"),"-p","test_*.py","-v"])]
- for name in ["blender_cap24_regression.py","blender_smoke.py","blender_classic_smoke.py"]:
+ for name in ["blender_i18n_regression.py","blender_cap24_regression.py","blender_smoke.py","blender_classic_smoke.py"]:
   cmd=[a.blender,"--factory-startup","-b","--python-exit-code","1","--python",str(ROOT/"tests"/name)]
   if name=="blender_smoke.py":cmd += ["--","--strict-geometry","--output",str(out/"tree_smoke.json")]
   runs.append((name,cmd))

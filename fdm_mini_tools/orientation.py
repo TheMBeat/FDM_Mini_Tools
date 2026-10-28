@@ -92,7 +92,7 @@ def choose(obj, overhang_deg=45, front_mode='AUTO'):
     if front_mode == 'VIEW':
         stored = obj.get(FRONT_KEY)
         if stored is None:
-            raise ValueError('Vorderseite fehlt: zuerst Diese Ansicht ist vorne verwenden')
+            raise ValueError("Front direction is missing; use the current view as front first")
         front = Vector(stored).normalized()
         source, confidence = 'user view', 1.
     elif front_mode != 'AUTO':
@@ -102,7 +102,7 @@ def choose(obj, overhang_deg=45, front_mode='AUTO'):
     if front is not None:
         horizontal = Vector((front.x,front.y,0))
         if horizontal.length < .2:
-            raise ValueError('Vorderseite fast senkrecht: eine Seitenansicht verwenden')
+            raise ValueError("Front direction is almost vertical; use a side view")
         yaw_values = (math.atan2(front.x,front.y),)
     else:
         yaw_values = (0,math.pi/2,math.pi,3*math.pi/2)
@@ -120,7 +120,7 @@ def choose(obj, overhang_deg=45, front_mode='AUTO'):
                 if best is None or key < best[0]:
                     best = key,rot,row
     if best is None:
-        raise ValueError('Keine sichere Ausrichtung fuer die festgelegte Vorderseite')
+        raise ValueError("No safe orientation for the selected front direction")
     _,rot,row = best
     row.update(front_source=source,front_confidence=confidence,
         front_direction=list(front) if front is not None else None,

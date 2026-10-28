@@ -44,7 +44,7 @@ def source_detail_reference(obj,front_mode):
     front,confidence=orientation.estimate_front(data[0],data[2],data[3])
     if front_mode=='VIEW':
         if obj.get(orientation.FRONT_KEY) is None:
-            raise ValueError('Vorderseite fehlt: Ansicht zuerst festlegen')
+            raise ValueError("Front direction is missing; set the view first")
         front=Vector(obj[orientation.FRONT_KEY]);confidence=1.
     elif front_mode!='AUTO':
         front=Vector(dict(POS_X=(1,0,0),NEG_X=(-1,0,0),POS_Y=(0,1,0),NEG_Y=(0,-1,0))[front_mode]);confidence=1.
@@ -136,7 +136,7 @@ def coarse(source,max_parts=6,clearance=.15,manual_plane=None,progress=None,join
         cut_trials=0
         for depth in range(1,max_parts):
             if progress:
-                progress(8+depth*3,f'Schnittvarianten pruefen: bis {depth+1} Teile')
+                progress(8+depth*3,f'Checking split variants: up to {depth+1} parts')
             best=None
             # Split only one part per depth; bounded greedy beam. Every rejected
             # proposal is recorded; this is not a proof that no other cut exists.
@@ -422,7 +422,7 @@ def optimize(source,profile_path,output_dir,orca,cfg=None,max_parts=6,clearance=
         source[REPORT_KEY]=str(out/'optimization.json')
         (out/'optimization.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
         bpy.context.scene['fdm_optimization_report']=str(out/'optimization.json')
-        if progress:progress(100,'Vergleich gespeichert; Vorschau und offene Bereiche pruefen')
+        if progress:progress(100,"Comparison saved; review the preview and unresolved regions")
         return report
     finally:
         retained={o for c in candidates if c.get('supports') for o in c['parts']+c['supports']}

@@ -2,11 +2,21 @@
 
 Experimental Blender add-on for preparing FDM miniatures: model cleanup, orientation, SLASG Classic supports and Tree supports with short SLA-style tips.
 
-**0.3.0 RC1 — public test build.** Tested locally with Blender **5.2.1 LTS on Windows**, primarily for a 0.2 mm nozzle. Other systems and physical print quality are unverified. Tree supports can still leave uncovered regions or fail mesh validation. Keep the original model and review every result in your slicer.
+**0.3.0 RC2 — public test build.** Tested locally with Blender **5.2.1 LTS on Windows**, primarily for a 0.2 mm nozzle. Other systems and physical print quality are unverified. Tree supports can still leave uncovered regions or fail mesh validation. Keep the original model and review every result in your slicer.
+
+## Language / Sprache
+
+English and German are included, with explanatory tooltips. Select the language in Blender Preferences → Interface → Translation. For German, choose Deutsch and enable **Interface** and **Tooltips**. Disable Interface translation to keep English labels; tooltip translation can be toggled separately. Saved settings do not change when switching languages.
+
+Englisch und Deutsch sind enthalten. Unter Blender-Einstellungen → Oberflaeche → Uebersetzung **Deutsch**, **Oberflaeche** und **Tooltips** aktivieren.
 
 ## Install
 
-1. Download the **`fdm_mini_tools_0.3.0_RC1_<commit>.zip`** release asset. GitHub's automatic source ZIP is not the installable add-on.
+Download the **INSTALL_IN_BLENDER** asset from [Releases](https://github.com/TheMBeat/FDM_Mini_Tools/releases). Do not install GitHub **Code → Download ZIP**, a **SOURCE_DO_NOT_INSTALL** archive, or the outer Actions artifact ZIP. Never add, rename or nest folders manually.
+
+The installer must contain `fdm_mini_tools/__init__.py` directly inside one top-level `fdm_mini_tools/` folder. No version folder surrounds it.
+
+1. Download the **`INSTALL_IN_BLENDER_fdm_mini_tools_0.3.0_RC2_<commit>.zip`** release asset. GitHub's automatic source ZIP is not the installable add-on.
 2. In Blender: Preferences → Add-ons → menu → Install from Disk; select that ZIP and enable **FDM Mini Tools**.
 3. Open the 3D View sidebar with `N`, then **FDM Mini**. Restart Blender when replacing an installed version.
 4. Check the displayed commit SHA when reporting results. The bundled SLASG library needs no separate installation.

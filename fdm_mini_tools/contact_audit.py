@@ -128,24 +128,24 @@ def markers(model,report,unresolved,rejected):
 def export_status(support,model=None):
     text=support.get('fdm_tree_contact_audit')
     if not text:
-        return dict(incomplete=True,reason='Kontaktpruefung fehlt; Supports neu erzeugen')
+        return dict(incomplete=True,reason="Contact audit is missing; regenerate supports")
     report=json.loads(text)
     if 'required_minima' not in report:
-        return dict(incomplete=True,reason='Pflicht-Tiefpunktpruefung fehlt; Supports neu erzeugen')
+        return dict(incomplete=True,reason="Required low-point audit is missing; regenerate supports")
     if model is not None:
         from .required_minima import geometry_signature
         if report['required_minima'].get('model_signature')!=geometry_signature(model):
-            return dict(incomplete=True,reason='MINI seit Tiefpunktpruefung veraendert; Supports neu erzeugen')
+            return dict(incomplete=True,reason="MINI changed since the low-point audit; regenerate supports")
     missing=int(report['missing_count'])
     unresolved=int(support.get('fdm_tree_unresolved_tips',0))
     required=int(report.get('required_minima',{}).get('missing',0))
     stability=report.get('stability')
-    if stability is None:return dict(incomplete=True,reason='Stammpruefung fehlt; Supports neu erzeugen')
+    if stability is None:return dict(incomplete=True,reason="Stem audit is missing; regenerate supports")
     from .required_minima import geometry_signature
     if stability.get('support_signature')!=geometry_signature(support):
-        return dict(incomplete=True,reason='Support seit Stammpruefung veraendert; Supports neu erzeugen')
+        return dict(incomplete=True,reason="Supports changed since the stem audit; regenerate supports")
     unstable=int(stability.get('unresolved',0))
     return dict(incomplete=bool(missing or unresolved or required or unstable),missing=missing,unresolved=unresolved,
         required_minima_missing=required,
         unstable_stem_spans=unstable,
-        reason=f'{missing} geometrische Pruefbereiche (Heuristik), {unresolved} ungeloeste Kontakte, {required} ungesicherte Tiefpunkte, {unstable} freie Stammabschnitte ueber Richtwert')
+        reason=f'{missing} geometric review regions (heuristic), {unresolved} unresolved contacts, {required} unsupported low points, {unstable} unsupported stem spans above the limit')

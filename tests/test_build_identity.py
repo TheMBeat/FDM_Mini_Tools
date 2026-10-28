@@ -16,7 +16,7 @@ class BuildIdentity(unittest.TestCase):
   self.assertTrue(result['verified']);self.assertEqual(result['commit'],self.commit)
  def test_modified_source_is_not_reported_clean(self):
   self.write();(self.root/'code.py').write_bytes(b'answer=0\n')
-  result=version.read_build(self.root);self.assertFalse(result['verified']);self.assertIn('Geaendert',result['label'])
+  result=version.read_build(self.root);self.assertFalse(result['verified']);self.assertIn('Modified',result['label'])
  def test_missing_metadata_does_not_invent_commit(self):
   result=version.read_build(self.root);self.assertFalse(result['verified']);self.assertIsNone(result['commit'])
  def test_extra_file_invalidates_identity_but_bytecode_does_not(self):

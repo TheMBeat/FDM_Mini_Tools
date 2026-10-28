@@ -2233,7 +2233,7 @@ def export_outputs(
         status=contact_audit.export_status(support,model=model)
         contact_status=status
         if status['incomplete'] and not allow_incomplete_tree_export:
-            raise RuntimeError('Tree-Export gesperrt: '+status['reason']+'. Fuer reine Vorschau explizit freigeben.')
+            raise RuntimeError('Tree export blocked: '+status['reason']+'. Explicitly enable preview-only export to proceed.')
         # Validate the construction result; export repair must not disguise
         # disconnected/invalid Tree geometry. Classic binding is untouched.
         tree_mesh.validate_support(model, support)
@@ -2492,7 +2492,7 @@ def prepare_model(
     if orientation_mode == 'SCORED' and config.get('orientation_front') == 'VIEW':
         captured_path = config.get('orientation_front_path')
         if not captured_path or Path(captured_path).resolve() != Path(source_path).resolve():
-            raise ValueError('Vorderseite fuer diese Datei fehlt: importieren und Ansicht festlegen')
+            raise ValueError('Front direction is missing for this file: import it and set the view')
     if clear:
         clear_scene(purge=True)
     configure_mm_units()
