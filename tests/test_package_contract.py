@@ -11,7 +11,7 @@ class PackageContractTest(unittest.TestCase):
     def test_all_python_parses(self):
         for p in ROOT.rglob('*.py'):
             with self.subTest(p=p.name):
-                ast.parse(p.read_text(encoding='utf-8'), filename=str(p))
+                ast.parse(p.read_text(encoding='utf-8'), filename=str(p), feature_version=(3, 11))
 
     def test_contact_backend_wiring(self):
         core = (ROOT/'core.py').read_text(encoding='utf-8')

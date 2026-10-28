@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ROOT_FILES = {"README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md", "CHANGELOG.md", ".gitignore", ".gitattributes", "requirements-dev.txt"}
 DOCS = {"docs/RELEASE_NOTES.md", "docs/TESTING.md", "docs/PUBLISHING.md"}
-TESTS = {"optimization_cli.py", "diagnose_tree_blender.py", "tree_export_qa.py", "blender_smoke.py", "blender_classic_smoke.py", "blender_cap24_regression.py", "blender_version_ui_smoke.py", "build_versioned_package.py", "run_public_validation.py"}
+TESTS = {"optimization_cli.py", "diagnose_tree_blender.py", "tree_export_qa.py", "blender_smoke.py", "blender_classic_smoke.py", "blender_cap24_regression.py", "blender_version_ui_smoke.py", "build_versioned_package.py", "run_public_validation.py", "blender_i18n_regression.py", "blender_install_package_smoke.py"}
 def allowed(name):
  p = Path(name)
  return (name in ROOT_FILES or name in DOCS or name.startswith("fdm_mini_tools/") or name.startswith(".github/") or name.startswith("tools/") or

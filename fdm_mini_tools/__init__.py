@@ -9,12 +9,13 @@ bl_info = {
     "category": "3D View",
 }
 
-from . import preferences, properties, operators, ui
+from . import preferences, properties, operators, ui, i18n
 
 _modules = (preferences, properties, operators, ui)
 
 
 def register():
+    i18n.register()
     for module in _modules:
         module.register()
 
@@ -22,3 +23,4 @@ def register():
 def unregister():
     for module in reversed(_modules):
         module.unregister()
+    i18n.unregister()

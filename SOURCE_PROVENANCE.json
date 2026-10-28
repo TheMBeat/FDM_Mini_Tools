@@ -79,5 +79,6 @@
     "tests/tree_export_qa.py": "33c820c35ceb38b9f306bbbc73a436191729c4c78a031913450152b9df82312f",
     "tools/build_release.py": "e78fb4d33dc4d05022f842e622a81339f71b0e28c93ecb3d99c2a76189bb5683",
     "tools/prepare_public_repository.py": "088e020847551b3d8ebe0b3d8530a82cf018868da3cc9187fd076fcb09d109e1"
-  }
+  },
+  "provenance_scope": "Initial public import only; subsequent changes are recorded in Git. Current package checksums are in _build.json."
 }

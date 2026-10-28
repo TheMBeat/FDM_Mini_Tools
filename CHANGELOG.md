@@ -1,6 +1,13 @@
 # Changelog
 
-## 0.3.0 RC1 — experimental public test build
+## 0.3.0 RC2 — language and installation fix
+
+- English/German interface and explanatory tooltips using Blender language settings.
+- Clearly named INSTALL_IN_BLENDER and SOURCE_DO_NOT_INSTALL assets.
+- Archive structure validation and actual installation checks in an isolated Blender profile.
+- Saved property identifiers and support safety gates preserved.
+
+## 0.3.0 RC2 — experimental public test build
 
 - Five-step workflow and Simple / Advanced / Expert settings.
 - Verified commit identity in packaged builds.

@@ -10,7 +10,7 @@ def build(output):
    raise RuntimeError("Not a clean public source tree: "+n)
  builder=runpy.run_path(str(ROOT/"tests/build_versioned_package.py"))
  output=Path(output).resolve();meta=builder["build"](ROOT,output)
- source=output/("fdm_mini_tools_source_"+meta["commit"][:12]+".zip")
+ source=output/("SOURCE_DO_NOT_INSTALL_fdm_mini_tools_"+meta["commit"][:12]+".zip")
  subprocess.run(["git","-C",str(ROOT),"archive","--format=zip","--prefix=fdm-mini-tools/","--output",str(source),"HEAD"],check=True)
  with zipfile.ZipFile(meta["package"]) as z:
   assert "fdm_mini_tools/resources/SLASG_FDM_Mini.blend" in z.namelist()

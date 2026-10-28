@@ -1,4 +1,4 @@
-# FDM Mini Tools 0.3.0 RC1
+# FDM Mini Tools 0.3.0 RC2
 
 Experimental test build for Blender 5.2.1 LTS on Windows. No stable/physical-print certification.
 
@@ -11,3 +11,5 @@ Inspect contact, low-point and stem warnings and review slicer layers. Incomplet
 Source, release notes, issue reporting and checksums are supplied with the accompanying public source/release assets. Include the commit SHA, Blender/OS, settings, phase/time and a permitted minimal reproducer in bug reports.
 
 Add-on: GPL-3.0-or-later (LICENSE). Bundled SLASG: MIT (resources/THIRD_PARTY_SLASG.txt). No rights to redistribute third-party test models are included.
+
+Languages: English and German, including explanatory tooltips. Use Blender Preferences > Interface > Translation; select Deutsch and enable Interface and Tooltips for German. Install the INSTALL_IN_BLENDER ZIP directly; do not install a source ZIP or rearrange folders.

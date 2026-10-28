@@ -19,7 +19,7 @@ import time
 
 import bpy
 from mathutils import Vector
-from . import tree_collision, tree_routes
+from . import tree_collision, tree_routes, i18n
 
 
 TREE_OBJECT_NAME = "SUPPORTS"
@@ -105,7 +105,7 @@ class TreeStats:
 
 
 def _log(msg):
-    print(f"[FDM Tree] {msg}")
+    print(i18n.format_iface('[FDM Tree] {v0}', v0=msg))
 
 
 def _progress(callback, percent, step):
@@ -747,10 +747,10 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
             stats.contact_audit=audit
             stats.required_minima=dict(missing=0,points=[],enforced=True)
             result=stats.as_dict();result['no_support_required']=True
-            _progress(progress,100,'Bettauflage nachgewiesen; keine Zusatzstuetzen erforderlich')
+            _progress(progress,100,"Bed contact verified; no additional supports required")
             return None,result
     if not components and not cfg.get('tree_required_minima',False):
-        raise RuntimeError(f"No usable FDM Tree contacts remained after surface validation: {stats.rejection_reasons}")
+        raise RuntimeError(i18n.format_iface('No usable FDM Tree contacts remained after surface validation: {v0}', v0=stats.rejection_reasons))
 
     stats.phase_seconds["contact_adapters"]=time.perf_counter()-phase_started
     phase_started=time.perf_counter()
@@ -760,14 +760,13 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
         components, merged = _merge_round(components, cfg, bvh)
         stats.merge_count += merged
         _log(
-            f"merge round {round_index + 1}: {merged} merges, "
-            f"{len(components)} active components"
+            i18n.format_iface('merge round {v0}: {v1} merges, {v2} active components', v0=round_index + 1, v1=merged, v2=len(components))
         )
         if merged == 0:
             break
 
     stats.phase_seconds["merge"]=time.perf_counter()-phase_started
-    _progress(progress, 58, "Pflicht-Tiefpunkte ermitteln")
+    _progress(progress, 58, "Find required low points")
     rooted_edges = []
     branch_r = max(0.10, float(cfg.get("tree_branch_diameter", 1.00)) * 0.5)
     trunk_r = max(branch_r, float(cfg.get("tree_trunk_diameter", 1.80)) * 0.5)
@@ -792,7 +791,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
     stats.phase_seconds["required_minima"]=time.perf_counter()-phase_started
     phase_started=time.perf_counter()
     if cfg.get('tree_prioritize_contacts', True) and births:
-        _progress(progress,59,'Schichtbereiche fuer Kontaktprioritaet analysieren')
+        _progress(progress,59,"Analyze layers to prioritize contacts")
         births,priority=prioritize(bvh,births,float(cfg.get('tree_layer_height',.08)))
         if hasattr(bvh,'recovery_budget'): bvh.recovery_budget.priority=priority
     stats.phase_seconds["layer_priority"]=time.perf_counter()-phase_started
@@ -816,7 +815,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
                 else:pending_components.append((component,old_route))
         if not cfg.get('tree_required_minima',False):return
         for index,record in enumerate(births):
-            _progress(progress,60+15*index/max(1,len(births)),f'Pflicht-Tiefpunkt {index+1}/{len(births)} pruefen')
+            _progress(progress,60+15*index/max(1,len(births)),i18n.format_iface('Required low point {v0}/{v1} check', v0=index + 1, v1=len(births)))
             if required_minima.covered_by_edges(record,rooted_edges):
                 required_plan.append(dict(id=record['id'],status='existing_rooted_cone'))
                 continue
@@ -832,7 +831,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
         # certified grounded contacts or transactionally widen carrying paths.
         for record in births:
             if required_minima.covered_by_edges(record,rooted_edges):continue
-            _progress(progress,75,f"Kontakt-Austritt Tiefpunkt {record['id']+1}/{len(births)} pruefen")
+            _progress(progress,75,i18n.format_iface('Contact exit for low point {v0}/{v1} check', v0=record['id'] + 1, v1=len(births)))
             component,detail=contact_completion.choose(record['point'],bvh,cfg,reuse_or_ground,record,
                 tip_route_finder=lambda node:tree_network.find_tip(node,cfg,bvh,rooted_edges,certified_roots) if reuse else None)
             recovery.append(dict(kind='minimum',id=record['id'],recovered=bool(component),**detail))
@@ -847,7 +846,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
             for cone in cones:
                 p=cone.contact_zone[0]
                 if already_supported(p):continue
-                _progress(progress,76,'Offenen Astkontakt erneut pruefen')
+                _progress(progress,76,"Retry unresolved branch contact")
                 component,detail=contact_completion.choose(p,bvh,dict(cfg,_completion_local_routes=24),reuse_or_ground,
                     tip_route_finder=lambda node:tree_network.find_tip(node,cfg,bvh,rooted_edges,certified_roots) if reuse else None)
                 recovery.append(dict(detail,kind='unresolved',point=list(p),recovered=bool(component)))
@@ -866,7 +865,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
                 stats.rejected_points-=1
                 stats.rejection_reasons[rejected['reason']]-=1
                 continue
-            _progress(progress,77,'Abgewiesenen Oberflaechenkontakt erneut pruefen')
+            _progress(progress,77,"Retry rejected surface contact")
             component,detail=contact_completion.choose(p,bvh,cfg,reuse_or_ground,
                 tip_route_finder=lambda node:tree_network.find_tip(node,cfg,bvh,rooted_edges,certified_roots) if reuse else None)
             recovery.append(dict(detail,kind='rejected',point=list(p),recovered=bool(component)))
@@ -889,7 +888,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
                 return tree_guided.find(node,cfg,bvh,rooted_edges,certified_roots,budget=1800)
             for record in births:
                 if required_minima.covered_by_edges(record,rooted_edges):continue
-                _progress(progress,78,f"Umweg zu geerdetem Ast: Tiefpunkt {record['id']+1}")
+                _progress(progress,78,i18n.format_iface('Route to rooted branch: low point {v0}', v0=record['id'] + 1))
                 component,detail=contact_completion.choose(record['point'],bvh,local,guided_route,record)
                 guided.append(dict(kind='minimum',id=record['id'],recovered=bool(component),**detail))
                 if component:
@@ -911,7 +910,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
         # scatter. These are heuristic candidates, never mandatory islands;
         # existing required contacts keep priority and share the same budget.
         from . import contact_audit
-        _progress(progress,78,'Kontaktluecken auf Unterseiten pruefen')
+        _progress(progress,78,"Check underside contact gaps")
         audit=contact_audit.audit(model,[e.contact_zone[0] for e in rooted_edges if e.kind=='TIP_CONE'],
             float(cfg.get('spacing',1.45)),float(cfg.get('overhang_angle',45.)),
             direct_bed=bool(cfg.get('_direct_bed',False)))
@@ -971,7 +970,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
 
     if not rooted_edges:
         raise RuntimeError(
-            f"FDM Tree could not route any support component safely to the buildplate: {stats.rejection_reasons}"
+            i18n.format_iface('FDM Tree could not route any support component safely to the buildplate: {v0}', v0=stats.rejection_reasons)
         )
 
     stats.phase_seconds["routing"]=time.perf_counter()-phase_started
@@ -985,7 +984,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
         rooted_edges[:]=original_edges;certified_roots[:]=original_roots;raft_roots[:]=original_raft
         raft=None;support=None
         try:
-            _progress(progress,76,'Freie Staemme pruefen und absichern')
+            _progress(progress,76,"Check and stabilize free stems")
             stats.stability=tree_stability.apply(rooted_edges,certified_roots,raft_roots,variant,bvh)
             _progress(progress,78,'Create tree support mesh')
             support=_build_curve_mesh(rooted_edges,cfg,TREE_OBJECT_NAME)
@@ -998,7 +997,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
             tree_mesh.triangulate(support)
             if cfg.get('tree_stabilize_stems',False):
                 stats.stability['enclosed_void_fill']=tree_stability.fill_tiny_enclosed_voids(model,support,cfg,bvh)
-            _progress(progress,90,'Abschliessende Kollisionspruefung')
+            _progress(progress,90,"Final collision check")
             stats.mesh_qa=tree_mesh.validate_support(model,support,ctx,collider=bvh)
             stats.mesh_qa.update(cap_endpoint_welds=support.get('fdm_tree_cap_endpoint_welds',0),
                 cap_max_displacement_mm=support.get('fdm_tree_cap_max_displacement_mm',0.),
@@ -1023,7 +1022,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
     stats.collision_rejections = dict(bvh.rejections)
     from . import contact_audit
     rooted_contacts=[e.contact_zone[0] for e in rooted_edges if e.kind=='TIP_CONE']
-    _progress(progress,92,'Kontaktabdeckung pruefen')
+    _progress(progress,92,"Check contact coverage")
     try:
         stats.contact_audit=contact_audit.audit(model,rooted_contacts,float(cfg.get('spacing',1.45)),float(cfg.get('overhang_angle',45.)),direct_bed=bool(cfg.get('_direct_bed',False)))
         stats.required_minima=required_minima.audit(model,support,births,rooted_edges)
@@ -1037,7 +1036,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
         missing={p['id'] for p in stats.required_minima['points'] if not p['covered']}
         records=[p for p in births if p['id'] in missing]
         records += [dict(id=100000+i,point=p) for i,r in enumerate(stats.unresolved_routes) for p in r['contacts']]
-        _progress(progress,94,'Schichtinseln pruefen')
+        _progress(progress,94,"Check layer islands")
         layer_report=layer_islands.diagnose(bvh.shell_geometry,records,
             layer=float(cfg.get('tree_layer_height',.08)),first=float(cfg.get('tree_first_layer_height',.2)),
             line_width=float(cfg.get('tree_line_width',.22)))
@@ -1070,9 +1069,7 @@ def generate_tree_supports(model, point_source, cfg, progress=None):
 
     _progress(progress, 96, "Tree support mesh ready")
     _log(
-        f"{stats.contacts} contacts, {stats.merge_count} merges, "
-        f"{stats.rooted_tips} rooted tips, {stats.unresolved_tips} unresolved, "
-        f"{stats.segment_count} segments"
+        i18n.format_iface('{v0} contacts, {v1} merges, {v2} rooted tips, {v3} unresolved, {v4} segments', v0=stats.contacts, v1=stats.merge_count, v2=stats.rooted_tips, v3=stats.unresolved_tips, v4=stats.segment_count)
     )
     if hasattr(bvh,'recovery_budget'):
         stats.completion['search_budget']=bvh.recovery_budget.summary()
