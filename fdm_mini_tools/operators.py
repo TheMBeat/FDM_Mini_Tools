@@ -926,7 +926,7 @@ class FDMMINI_OT_optimization_run(Operator):
             p.ui_selected_variant='ORIGINAL'
             p.ui_variant_assembly=False
             _cache_comparison_ui(p,result)
-            p.optimization_status=(f"{len(result['candidates'])} comparisons; recommendation: {result['recommended'] or "no complete variant"}")
+            p.optimization_status=(f"{len(result['candidates'])} comparisons; recommendation: {result['recommended'] or 'no complete variant'}")
             if result['failures']:
                 p.optimization_status+=f"; {len(result['failures'])} errors in the report"
             if not result['candidates']:
